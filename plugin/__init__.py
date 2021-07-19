@@ -1351,14 +1351,23 @@ class AnkiConnect:
             collection.models.setCurrent(model)
             collection.models.update(model)
 
+        autoAdd = False
         closeAfterAdding = False
         if note is not None and 'options' in note:
             if 'closeAfterAdding' in note['options']:
                 closeAfterAdding = note['options']['closeAfterAdding']
                 if type(closeAfterAdding) is not bool:
                     raise Exception('option parameter \'closeAfterAdding\' must be boolean')
+        if 'autoAdd' in note['options']:
+                autoAdd = note['options']['autoAdd']
+                if type(autoAdd) is not bool:
+                    raise Exception('option parameter \'autoAdd\' must be boolean')
 
         addCards = None
+
+        if autoAdd:
+            cardID = self.addNote(note)
+            return cardID
 
         if closeAfterAdding:
             randomString = ''.join(random.choice(string.ascii_letters) for _ in range(10))
@@ -1378,6 +1387,8 @@ class AnkiConnect:
                     self.addButton.setShortcut(aqt.qt.QKeySequence('Ctrl+Return'))
 
                 def _addCards(self):
+                    #added silentlyClose feature
+                    self.silentlyClose = True
                     super()._addCards()
 
                     # if adding was successful it must mean it was added to the history of the window
